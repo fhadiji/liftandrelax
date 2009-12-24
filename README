@@ -1,0 +1,25 @@
+Implementation of Marginal CPI with libSTREAM
+
+    * go to liftandrelax/CPP
+    * edit Makefile according to local machine
+    * call make
+    * go to liftandrelax/STREAM_Python
+    * export PYTHONPATH=../CPP/:/PATH/TO/pymlns/
+    * export LD_LIBRARY_PATH=../CPP/
+
+mln2fg.py
+
+    * ./src/mln2fg.py --cnf ./resources/smokers.mln
+          o This will create a weighted CNF factor graph from the MLN called 'smokers_cnf.fg'
+    * ./src/mln2fg.py --cnf ./resources/smokers.mln ./resources/smokers.db
+          o This will create a weighted CNF factor graph from the given smokers.mln with respect to the evidence given in smokers.db
+          o The evidence file accepts evidence in the form such as smokes(Anna), friends(Anna, Bob). Each evidence must be in a separate line.
+
+runCbpOnFgFile.py
+
+    * ./src/runCbpOnFgFile.py smokers_cnf.fg
+    * This will run CBP on the smokers_cnf factor graph and output the marginal of the variables
+
+runMarginalCpi.py
+
+    * ./src/runMarginalCpi.py smokers_cnf.fg

@@ -1,0 +1,15 @@
+// domarin declarations
+//person = {Anna, Bob, Charles,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z}
+person = {Anna, Bob, Charles}
+
+// predicate declarations
+cancer(person)
+smokes(person)
+friends(person, person)
+
+// weighted formulas
+2.3 !cancer(x)
+1.4 !smokes(x)
+2.0 !friends(x,y)
+1.5 smokes(x) => cancer(x)
+1.1 friends(x,y) => (smokes(x) <=> smokes(y)) 

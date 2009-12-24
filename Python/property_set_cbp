@@ -1,0 +1,1 @@
+[maxiter=1000,tol=1e-08,logdomain=0,inference=SUMPROD,updates=PARALL,verbose=1]

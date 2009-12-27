@@ -35,6 +35,40 @@ import math;
 from libSTREAMWrapper import *;
 import stream.Utils;
 
+# add 'prior' factors first
+def createInitialSubGraph (fg, remainingFactors):
+    subGraphFactors = vector_factor();
+    remainingVars = set();
+    for var in fg.vars():
+        remainingVars.add(var.label());
+    
+    for factorIdx, factor in enumerate(fg.factors()):
+        if factor.vars().size() == 1:
+            subGraphFactors.push_back(factor);
+            remainingVars.remove(factor.vars().elements()[0].label());
+            remainingFactors.remove(factorIdx);
+    
+    for factorIdx, factor in enumerate(fg.factors()):
+        if factor.vars().size() > 1:
+            add = False
+            for var in factor.vars().elements():
+                if var.label() in remainingVars:
+                    remainingVars.remove(var.label());
+                    add = True;
+            if add:
+                subGraphFactors.push_back(factor);
+                remainingFactors.remove(factorIdx);
+    
+    assert fg.nrFactors() == (len(remainingFactors) + len(subGraphFactors))
+    assert len(remainingVars) == 0;
+    
+    yield subGraphFactors;
+    
+    subGraph = FactorGraph(subGraphFactors);
+    assert subGraph.nrVars() == fg.nrVars();
+    
+    yield subGraph;
+
 # important: this calculation assumes:
 # i) each factor is a conjunction of binary variables
 # i) all factors have same weight (=1)
@@ -86,60 +120,18 @@ def runMarginalCpi(fgFilename, verbose):
     remainingFactors = set();
     # stores factor idx in the original graph
     subgraphFactors = set();
-    # stores variable objects from the original graph
-    remainingVars = set();
-    
-    for var in fg.vars():
-        remainingVars.add(var.label());
-    
+
     for idx in range(fg.nrFactors()):
         remainingFactors.add(idx);
        
     print "Original factor graph contains",fg.nrFactors(),"factors and",fg.nrVars(),"vars";
     
-    # don't use any unary factors in 
-    # select factors that every variables is contained
-    for idx in remainingFactors:
-        add = False;
-        factor = fg.factor(idx);
-        if factor.vars().size() > 1:
-            for var in factor.vars():                
-                if var.label() in remainingVars: 
-                    remainingVars.remove(var.label())
-                    add = True;
-            if add:
-                subgraphFactors.add(idx)
-                
-    remainingFactors -= subgraphFactors;
-    
-    # in case the factor graph is not connected, add unary factors for variables which haven't been added
-    if len(remainingVars) > 0:
-        for idx in remainingFactors:
-            factor = fg.factor(idx);
-            add = False;
-            if factor.vars().size() == 1:
-                for var in factor.vars():
-                    if var.label() in remainingVars:
-                        remainingVars.remove(var.label())
-                        add = True;
-                if add:
-                    subgraphFactors.add(idx)
-    
-    remainingFactors -= subgraphFactors;    
-    
-    assert bp.nrFactors() == (len(remainingFactors) + len(subgraphFactors))
-    assert len(remainingVars) == 0;
-    
-    factors = vector_factor();
-    for idx in subgraphFactors:
-        factors.push_back(fg.factor(idx));
-    subgraph = FactorGraph(factors);
-    assert subgraph.nrVars() == bp.nrVars();
-    
+    factors, subGraph = createInitialSubGraph(fg, remainingFactors);
+
     if verbose > 0:
-        print "initial sub-graph contains",subgraph.nrFactors(),"factors and",subgraph.nrVars(),"vars";
+        print "initial sub-graph contains",subGraph.nrFactors(),"factors and",subGraph.nrVars(),"vars";
         
-    infAlg = CBP(subgraph, opts);
+    infAlg = CBP(subGraph, opts);
     infAlg.init();
     infAlg.run();
     
@@ -169,6 +161,7 @@ def runMarginalCpi(fgFilename, verbose):
         infAlg.init();
         infAlg.run();
         if verbose > 0:
+            print "number of ground factors:",len(factors);
             print "sub-graph contains", infAlg.nrFactors(), "factors and",infAlg.nrVars(),"vars";
             print "maxnorm:",stream.Utils.maxnorm(bp, infAlg);
     

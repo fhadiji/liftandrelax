@@ -49,6 +49,7 @@
 #include <dai/varset.h>
 #include <dai/var.h>
 #include <dai/bp.h>
+#include <dai/gibbs.h>
 #include <STREAM/CBP/CBP.h>
 #include <STREAM/CBP/CFactorGraph.h>
 
@@ -60,6 +61,8 @@ using namespace boost::python;
 void (CBP::*CBPInit1)() = &CBP::init;
 
 void (BP::*BPInit1)() = &BP::init;
+
+void (Gibbs::*GibbsInit1)() = &Gibbs::init;
 
 size_t (Var::*const_label)() const = &Var::label;
 size_t (Var::*const_states)() const = &Var::states;
@@ -260,6 +263,15 @@ BOOST_PYTHON_MODULE(libSTREAMWrapper)
 		.def("getIterations", &BP::Iterations)
 		;
 
+	class_<Gibbs>("Gibbs", init<FactorGraph, PropertySet>())
+		.def("init", GibbsInit1)
+		.def("run", &Gibbs::run)
+		.def("beliefV", &Gibbs::beliefV)
+		.def("beliefF", &Gibbs::beliefF)
+		.def("getIterations", &Gibbs::Iterations)
+		;
+
+
 	class_<PropertySet>("PropertySet")
 		.def(str(self))
 		.def("Set", propertySet_set, return_internal_reference<>())
@@ -318,7 +330,9 @@ BOOST_PYTHON_MODULE(libSTREAMWrapper)
 		.def("createVarMapping", &CBP::createVarMapping)
 		;
 
-	class_<CompressInterface>("CompressInterace", no_init);
+	class_<CompressInterface>("CompressInterface", no_init)
+		.def("getVarColorVec", &CompressInterface::getVarColorVec)
+	        ;
 
 	class_<PositionCompress, bases<CompressInterface> >("PositionCompress")
 		.def("setCfg", &PositionCompress::setCfg)

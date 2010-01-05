@@ -67,6 +67,8 @@ void (Gibbs::*GibbsInit1)() = &Gibbs::init;
 size_t (Var::*const_label)() const = &Var::label;
 size_t (Var::*const_states)() const = &Var::states;
 
+const vector<Var> & (VarSet::*const_varSet_elements)() const = &VarSet::elements;
+
 const VarSet& (Factor::*const_vars)() const = &Factor::vars;
 
 const Factor & (FactorGraph::*const_factor)(size_t) const = &FactorGraph::factor;
@@ -210,14 +212,15 @@ BOOST_PYTHON_MODULE(libSTREAMWrapper)
 		.def("__iter__", boost::python::iterator<VarSet, return_internal_reference<> >())
 		.def(str(self))
 		.def("size", &VarSet::size)
+		.def("elements", const_varSet_elements, return_internal_reference<>())
 		;
 
 	class_<vector<Factor> >("vector_factor")
 		.def(str(self))
 		.def("__iter__", boost::python::iterator<vector<Factor>, return_internal_reference<> >())
 		.def("__getitem__", &vector_factor_getitem)
+		.def("__len__", &vector<Factor>::size)
 		.def("push_back", &vector<Factor>::push_back)
-		.def("size", &vector<Factor>::size)
 		;
 
 	class_<Factor>("Factor", init<VarSet>())

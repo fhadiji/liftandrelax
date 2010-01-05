@@ -537,4 +537,14 @@ void CBP::createVarMapping(CompressInterface * compressAlg, CFactorGraph& lifted
 	}
 }
 
+vector<size_t> CBP::clusterV(size_t superVar) const {
+	vector<size_t> cluster;
+	for (map<size_t, size_t>::const_iterator iter=_gndVarToSuperVar.begin(); iter != _gndVarToSuperVar.end(); iter++) {
+		if (iter->second == superVar) {
+			cluster.push_back(iter->first);
+		}
+	}
+	return cluster;
+}
+
 } // end of namespace STREAM

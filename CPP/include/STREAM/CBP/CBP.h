@@ -174,6 +174,7 @@ class CBP : public CFactorGraph {
         virtual dai::Factor beliefV( size_t i ) const;
         virtual dai::Factor beliefF( size_t I ) const;
         void createVarMapping(CompressInterface * compressAlg, CFactorGraph& liftedFg);
+        virtual std::vector<size_t> clusterV(size_t superVar) const;
         size_t reprV(size_t gndIdx) {
         	return _gndVarToSuperVar.find(gndIdx)->second;
         }

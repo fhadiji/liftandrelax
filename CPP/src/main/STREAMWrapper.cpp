@@ -50,6 +50,7 @@
 #include <dai/var.h>
 #include <dai/bp.h>
 #include <dai/gibbs.h>
+#include <dai/jtree.h>
 #include <STREAM/CBP/CBP.h>
 #include <STREAM/CBP/CFactorGraph.h>
 
@@ -63,6 +64,8 @@ void (CBP::*CBPInit1)() = &CBP::init;
 void (BP::*BPInit1)() = &BP::init;
 
 void (Gibbs::*GibbsInit1)() = &Gibbs::init;
+
+void (JTree::*JTreeInit1)() = &JTree::init;
 
 size_t (Var::*const_label)() const = &Var::label;
 size_t (Var::*const_states)() const = &Var::states;
@@ -184,6 +187,7 @@ BOOST_PYTHON_MODULE(libSTREAMWrapper)
 		;
 
 	class_<vector<size_t> >("vector_sizet", init<size_t>())
+	  //.def(str(self))
 		.def(vector_indexing_suite<vector<size_t> >())
 		.def("push_back", &vector<size_t>::push_back)
 		;
@@ -274,6 +278,14 @@ BOOST_PYTHON_MODULE(libSTREAMWrapper)
 		.def("getIterations", &Gibbs::Iterations)
 		;
 
+	class_<JTree>("JTree", init<FactorGraph, PropertySet>())
+		.def("init", GibbsInit1)
+		.def("run", &JTree::run)
+		.def("beliefV", &JTree::beliefV)
+		.def("beliefF", &JTree::beliefF)
+		.def("getIterations", &JTree::Iterations)
+		;
+
 
 	class_<PropertySet>("PropertySet")
 		.def(str(self))
@@ -325,6 +337,7 @@ BOOST_PYTHON_MODULE(libSTREAMWrapper)
 		.def("init", CBPInit1)
 		.def("run", &CBP::run)
 		.def("maxDiff",&CBP::maxDiff)
+		.def("clusterV",&CBP::clusterV)
 		.def("beliefV", &CBP::beliefV)
 		.def("beliefF", &CBP::beliefF)
 		.def("getIterations", &CBP::Iterations)
